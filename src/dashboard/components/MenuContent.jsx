@@ -31,6 +31,11 @@ const mainListItems = [
     icon: <AssignmentRoundedIcon />,
     url: "book-management",
   },
+  {
+    text: "Member Management",
+    icon: <AssignmentRoundedIcon />,
+    url: "member-management",
+  },
 ];
 
 const secondaryListItems = [
