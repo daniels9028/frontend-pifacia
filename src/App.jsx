@@ -5,6 +5,7 @@ import DashboardPage from "./page/DashboardPage";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import RoleManagementPage from "./page/RoleManagementPage";
 import UserManagementPage from "./page/UserManagementPage";
+import BookManagementPage from "./page/BookManagement";
 
 const App = () => {
   return (
@@ -17,7 +18,7 @@ const App = () => {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/role-management" element={<RoleManagementPage />} />
           <Route path="/user-management" element={<UserManagementPage />} />
-          <Route path="/book-management" element={<UserManagementPage />} />
+          <Route path="/book-management" element={<BookManagementPage />} />
         </Route>
       </Routes>
     </Router>

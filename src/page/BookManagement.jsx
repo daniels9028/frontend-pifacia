@@ -16,20 +16,9 @@ import {
   treeViewCustomizations,
 } from "../dashboard/theme/customizations";
 
-import { allUsers, createUser, deleteUser, updateUser } from "../api/user";
-import { allRoles } from "../api/role";
-import { getUserColumns } from "../datatable/userTable";
-import {
-  Button,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Modal,
-  Select,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { allBooks, createBook, deleteBook, updateBook } from "../api/book";
+import { getBookColumns } from "../datatable/bookTable";
+import { Button, Modal, TextField, Typography } from "@mui/material";
 
 const xThemeComponents = {
   ...chartsCustomizations,
@@ -39,21 +28,16 @@ const xThemeComponents = {
 };
 
 export default function BookManagementPage(props) {
-  const user = JSON.parse(localStorage.getItem("user"));
-
-  const navigate = useNavigate();
-
   const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmationPassword: "",
-    role_id: "",
+    title: "",
+    author: "",
+    extra_info: {
+      genre: "",
+      published_year: "",
+    },
   });
 
-  const [roles, setRoles] = useState([]);
-
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedBook, setSelectedBook] = useState(null);
 
   const [rows, setRows] = useState([]);
 
@@ -61,9 +45,9 @@ export default function BookManagementPage(props) {
 
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
-  const handleGetAllUsers = async () => {
+  const handleGetAllBook = async () => {
     try {
-      const response = await allUsers();
+      const response = await allBooks();
 
       setRows(response.data);
     } catch (error) {
@@ -71,99 +55,86 @@ export default function BookManagementPage(props) {
     }
   };
 
-  const handleGetAllRoles = async () => {
+  const handleAddBook = async () => {
     try {
-      const response = await allRoles();
+      await createBook(form);
 
-      setRoles(response.data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const handleAddUser = async () => {
-    try {
-      await createUser(form);
-
-      handleGetAllUsers();
+      handleGetAllBook();
 
       setOpenModal(false);
 
-      alert("User was successfully created");
+      alert("Book was successfully created");
 
       setForm({
-        name: "",
-        email: "",
-        password: "",
-        role_id: "",
+        title: "",
+        author: "",
+        extra_info: {
+          genre: "",
+          published_year: "",
+        },
       });
     } catch (error) {
-      alert(error.response.data.message || "Error when add user");
+      alert(error.response.data.message || "Error when add Book");
     }
   };
 
-  const handleEditUser = async () => {
+  const handleEditBook = async () => {
     try {
-      await updateUser(form);
+      await updateBook(form);
 
-      handleGetAllUsers();
+      handleGetAllBook();
 
       setOpenModal(false);
 
-      alert("User was successfully updated");
+      alert("Book was successfully updated");
 
       setForm({
-        name: "",
-        email: "",
-        password: "",
-        role_id: "",
+        title: "",
+        author: "",
+        extra_info: {
+          genre: "",
+          published_year: "",
+        },
       });
     } catch (error) {
-      alert(error.response.data.message || "Error when edit user");
+      alert(error.response.data.message || "Error when edit Book");
     }
   };
 
   const handleDeleteRole = async () => {
     try {
-      await deleteUser({ id: selectedUser.id });
+      await deleteBook({ id: selectedBook.id });
 
-      handleGetAllUsers();
+      handleGetAllBook();
 
-      alert("User was successfully deleted");
+      alert("Book was successfully deleted");
 
       setDeleteConfirmOpen(false);
-      setSelectedUser(null);
+      setSelectedBook(null);
     } catch (error) {
-      alert(error.response.data.message || "Error when delete user");
+      alert(error.response.data.message || "Error when delete Book");
     }
   };
 
   const onEdit = (row) => {
     setOpenModal(true);
-    setSelectedUser(row);
+    setSelectedBook(row);
     setForm(row);
   };
 
   const onDelete = (row) => {
-    setSelectedUser(row);
+    setSelectedBook(row);
     setDeleteConfirmOpen(true);
   };
 
   useEffect(() => {
-    handleGetAllUsers();
-    handleGetAllRoles();
+    handleGetAllBook();
   }, []);
 
-  const columns = getUserColumns({
+  const columns = getBookColumns({
     onEdit: onEdit,
     onDelete: onDelete,
   });
-
-  useEffect(() => {
-    if (user.role.name !== "admin") {
-      navigate("/dashboard");
-    }
-  }, [user]);
 
   return (
     <AppTheme {...props} themeComponents={xThemeComponents}>
@@ -191,7 +162,7 @@ export default function BookManagementPage(props) {
               mt: { xs: 8, md: 0 },
             }}
           >
-            <Header title="User Management" />
+            <Header title="Book Management" />
 
             <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
               <Typography
@@ -204,17 +175,19 @@ export default function BookManagementPage(props) {
                   alignItems: "center",
                 }}
               >
-                User Data{" "}
+                Book Data{" "}
                 <Button
                   variant="contained"
                   onClick={() => {
-                    setSelectedUser(null);
+                    setSelectedBook(null);
                     setOpenModal(true);
                     setForm({
-                      name: "",
-                      email: "",
-                      password: "",
-                      role_id: "",
+                      title: "",
+                      author: "",
+                      extra_info: {
+                        genre: "",
+                        published_year: "",
+                      },
                     });
                   }}
                 >
@@ -241,60 +214,61 @@ export default function BookManagementPage(props) {
               }}
             >
               <Typography variant="h6" gutterBottom>
-                {selectedUser ? "Edit User" : "Add New User"}
+                {selectedBook ? "Edit Book" : "Add New Book"}
               </Typography>
               <TextField
-                label="Name"
+                label="Title"
                 variant="outlined"
                 fullWidth
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
                 sx={{ my: 2 }}
               />
               <TextField
-                label="Email"
+                label="Author"
                 variant="outlined"
                 fullWidth
-                value={form.email}
-                type="email"
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                value={form.author}
+                onChange={(e) => setForm({ ...form, author: e.target.value })}
                 sx={{ my: 2 }}
               />
-              {!selectedUser && (
-                <TextField
-                  label="Password"
-                  variant="outlined"
-                  fullWidth
-                  value={form.password}
-                  type="password"
-                  onChange={(e) =>
-                    setForm({ ...form, password: e.target.value })
-                  }
-                  sx={{ my: 2 }}
-                />
-              )}
-              <FormControl fullWidth sx={{ my: 2 }}>
-                <InputLabel id="demo-simple-select-label">Role</InputLabel>
-                <Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                  value={form.role_id}
-                  label="Age"
-                  onChange={(e) =>
-                    setForm({ ...form, role_id: e.target.value })
-                  }
-                >
-                  {roles.map((role) => (
-                    <MenuItem value={role.id} key={role.id}>
-                      {role.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <TextField
+                label="Genre"
+                variant="outlined"
+                fullWidth
+                value={form.extra_info.genre}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    extra_info: {
+                      ...form.extra_info,
+                      genre: e.target.value,
+                    },
+                  })
+                }
+                sx={{ my: 2 }}
+              />
+              <TextField
+                label="Published Year"
+                variant="outlined"
+                fullWidth
+                type="number"
+                value={form.extra_info.published_year}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    extra_info: {
+                      ...form.extra_info,
+                      published_year: e.target.value,
+                    },
+                  })
+                }
+                sx={{ my: 2 }}
+              />
               <Button
                 variant="contained"
                 fullWidth
-                onClick={selectedUser ? handleEditUser : handleAddUser}
+                onClick={selectedBook ? handleEditBook : handleAddBook}
               >
                 Submit
               </Button>
@@ -323,7 +297,7 @@ export default function BookManagementPage(props) {
               </Typography>
               <Typography sx={{ mb: 2 }}>
                 Are you sure you want to delete the role{" "}
-                <strong>{selectedUser?.name}</strong>?
+                <strong>{selectedBook?.name}</strong>?
               </Typography>
               <Stack direction="row" spacing={2} justifyContent="flex-end">
                 <Button

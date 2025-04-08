@@ -29,7 +29,7 @@ const mainListItems = [
   {
     text: "Book Management",
     icon: <AssignmentRoundedIcon />,
-    url: "dashboard",
+    url: "book-management",
   },
 ];
 
