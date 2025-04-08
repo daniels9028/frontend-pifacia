@@ -23,3 +23,19 @@ export const deleteMember = async (credentials) => {
 
   return response.data;
 };
+
+export const exportMember = async (credentials) => {
+  const response = await api.post(`member/export`, credentials);
+
+  return response.data;
+};
+
+export const importMember = async (credentials) => {
+  const response = await api.post(`member/import`, credentials, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return response.data;
+};

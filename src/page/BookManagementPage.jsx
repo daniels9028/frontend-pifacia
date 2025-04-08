@@ -220,7 +220,7 @@ export default function BookManagementPage(props) {
             <Header title="Book Management" />
 
             <Box sx={{ mt: 3 }}>
-              <h2 className="text-lg font-bold">Import Buku</h2>
+              <h2 className="text-lg font-bold">Import Book</h2>
               <input
                 type="file"
                 accept=".xlsx"
@@ -236,7 +236,7 @@ export default function BookManagementPage(props) {
             </Box>
 
             <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
-              <h2 className="text-lg font-bold">Export Buku</h2>
+              <h2 className="text-lg font-bold">Export Book</h2>
               {availableFields.map((field) => (
                 <label key={field} className="block">
                   <input
