@@ -155,7 +155,7 @@ export default function MemberManagementPage(props) {
               mt: { xs: 8, md: 0 },
             }}
           >
-            <Header name="Member Management" />
+            <Header title="Member Management" />
 
             <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
               <Typography

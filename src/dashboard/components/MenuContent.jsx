@@ -36,6 +36,11 @@ const mainListItems = [
     icon: <AssignmentRoundedIcon />,
     url: "member-management",
   },
+  {
+    text: "Borrowing Management",
+    icon: <AssignmentRoundedIcon />,
+    url: "borrowing-management",
+  },
 ];
 
 const secondaryListItems = [

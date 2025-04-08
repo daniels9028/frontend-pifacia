@@ -17,15 +17,23 @@ import {
 } from "../dashboard/theme/customizations";
 
 import {
-  allBooks,
-  createBook,
-  deleteBook,
-  exportBook,
-  importBook,
-  updateBook,
-} from "../api/book";
-import { getBookColumns } from "../datatable/bookTable";
-import { Button, Modal, TextField, Typography } from "@mui/material";
+  allBorrowings,
+  createBorrowing,
+  deleteBorrowing,
+  updateBorrowing,
+  getFormOptions,
+} from "../api/borrowing";
+import { getBorrowingColumns } from "../datatable/borrowingTable";
+import {
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Modal,
+  Select,
+  TextField,
+  Typography,
+} from "@mui/material";
 
 const xThemeComponents = {
   ...chartsCustomizations,
@@ -34,23 +42,22 @@ const xThemeComponents = {
   ...treeViewCustomizations,
 };
 
-const availableFields = ["id", "title", "author", "extra_info"];
-
-export default function BookManagementPage(props) {
-  const [selectedFields, setSelectedFields] = useState([]);
-
-  const [importFile, setImportFile] = useState(null);
-
+export default function BorrowingManagementPage(props) {
   const [form, setForm] = useState({
-    title: "",
-    author: "",
-    extra_info: {
-      genre: "",
-      published_year: "",
+    book_id: "",
+    member_id: "",
+    borrowed_at: "",
+    attachment: null,
+    notes: {
+      condition: "",
+      remarks: "",
     },
   });
 
-  const [selectedBook, setSelectedBook] = useState(null);
+  const [books, setBooks] = useState([]);
+  const [members, setMembers] = useState([]);
+
+  const [selectedBorrowing, setSelectedBorrowing] = useState(null);
 
   const [rows, setRows] = useState([]);
 
@@ -58,15 +65,20 @@ export default function BookManagementPage(props) {
 
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
-  const handleFieldChange = (field) => {
-    setSelectedFields((prev) =>
-      prev.includes(field) ? prev.filter((f) => f !== field) : [...prev, field]
-    );
+  const handleGetFormOptions = async () => {
+    try {
+      const response = await getFormOptions();
+
+      setBooks(response.books);
+      setMembers(response.members);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
-  const handleGetAllBook = async () => {
+  const handleGetAllBorrowings = async () => {
     try {
-      const response = await allBooks();
+      const response = await allBorrowings();
 
       setRows(response.data);
     } catch (error) {
@@ -74,119 +86,104 @@ export default function BookManagementPage(props) {
     }
   };
 
-  const handleAddBook = async () => {
-    try {
-      await createBook(form);
+  const handleAddBorrowing = async () => {
+    if (form.attachment && form.attachment.size > 512000) {
+      alert("File size must be less than 500KB");
+      return;
+    }
 
-      handleGetAllBook();
+    try {
+      await createBorrowing(form);
+
+      handleGetAllBorrowings();
 
       setOpenModal(false);
 
-      alert("Book was successfully created");
+      alert("Borrowing was successfully created");
 
       setForm({
-        title: "",
-        author: "",
-        extra_info: {
-          genre: "",
-          published_year: "",
+        book_id: "",
+        member_id: "",
+        borrowed_at: "",
+        attachment: null,
+        notes: {
+          condition: "",
+          remarks: "",
         },
       });
     } catch (error) {
-      alert(error.response.data.message || "Error when add Book");
+      alert(error.response.data.message || "Error when add borrowing");
     }
   };
 
-  const handleEditBook = async () => {
+  const handleEditBorrowing = async () => {
     try {
-      await updateBook(form);
+      await updateBorrowing({ ...form, id: selectedBorrowing.id });
 
-      handleGetAllBook();
+      handleGetAllBorrowings();
 
       setOpenModal(false);
 
-      alert("Book was successfully updated");
+      alert("Borrowing was successfully updated");
 
       setForm({
-        title: "",
-        author: "",
-        extra_info: {
-          genre: "",
-          published_year: "",
+        book_id: "",
+        member_id: "",
+        borrowed_at: "",
+        attachment: null,
+        notes: {
+          condition: "",
+          remarks: "",
         },
       });
     } catch (error) {
-      alert(error.response.data.message || "Error when edit Book");
+      alert(error.response.data.message || "Error when edit borrowing");
     }
   };
 
   const handleDeleteRole = async () => {
     try {
-      await deleteBook({ id: selectedBook.id });
+      await deleteBorrowing({ id: selectedBorrowing.id });
 
-      handleGetAllBook();
+      handleGetAllBorrowings();
 
-      alert("Book was successfully deleted");
+      alert("Borrowing was successfully deleted");
 
       setDeleteConfirmOpen(false);
-      setSelectedBook(null);
+      setSelectedBorrowing(null);
     } catch (error) {
-      alert(error.response.data.message || "Error when delete Book");
-    }
-  };
-
-  const handleExport = async () => {
-    try {
-      const response = await exportBook({ fields: selectedFields });
-
-      if (response?.file_url) {
-        const fileUrl = response.file_url.startsWith("http")
-          ? response.file_url
-          : `http://localhost:8000${response.file_url}`;
-        window.open(fileUrl, "_blank");
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  const handleImport = async () => {
-    if (!importFile) {
-      alert("Pilih file terlebih dahulu.");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("file", importFile);
-
-    try {
-      await importBook(formData);
-
-      alert("File berhasil diupload. Import sedang diproses.");
-      setImportFile(null);
-      handleGetAllBook(); // Refresh data
-    } catch (error) {
-      console.error(error);
-      alert("Gagal mengimpor file.");
+      alert(error.response.data.message || "Error when delete borrowing");
     }
   };
 
   const onEdit = (row) => {
     setOpenModal(true);
-    setSelectedBook(row);
-    setForm(row);
+
+    setSelectedBorrowing(row);
+
+    setForm({
+      book_id: row.book_id,
+      member_id: row.member_id,
+      borrowed_at: row.borrowed_at.slice(0, 10),
+      attachment: null,
+      notes: {
+        condition: row.notes.condition,
+        remarks: row.notes.remarks,
+      },
+    });
   };
 
   const onDelete = (row) => {
-    setSelectedBook(row);
+    setSelectedBorrowing(row);
     setDeleteConfirmOpen(true);
   };
 
   useEffect(() => {
-    handleGetAllBook();
+    handleGetAllBorrowings();
+    handleGetFormOptions();
   }, []);
 
-  const columns = getBookColumns({
+  const columns = getBorrowingColumns({
     onEdit: onEdit,
     onDelete: onDelete,
   });
@@ -217,7 +214,7 @@ export default function BookManagementPage(props) {
               mt: { xs: 8, md: 0 },
             }}
           >
-            <Header title="Book Management" />
+            <Header title="Borrowing Management" />
 
             <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
               <Typography
@@ -230,18 +227,20 @@ export default function BookManagementPage(props) {
                   alignItems: "center",
                 }}
               >
-                Book Data{" "}
+                Borrowing Data{" "}
                 <Button
                   variant="contained"
                   onClick={() => {
-                    setSelectedBook(null);
+                    setSelectedBorrowing(null);
                     setOpenModal(true);
                     setForm({
-                      title: "",
-                      author: "",
-                      extra_info: {
-                        genre: "",
-                        published_year: "",
+                      book_id: "",
+                      member_id: "",
+                      borrowed_at: "",
+                      attachment: null,
+                      notes: {
+                        condition: "",
+                        remarks: "",
                       },
                     });
                   }}
@@ -249,44 +248,6 @@ export default function BookManagementPage(props) {
                   Add
                 </Button>
               </Typography>
-            </Box>
-
-            <Box sx={{ mt: 3 }}>
-              <h2 className="text-lg font-bold">Import Buku</h2>
-              <input
-                type="file"
-                accept=".xlsx"
-                onChange={(e) => setImportFile(e.target.files[0])}
-              />
-              <button
-                className="mt-2 px-4 py-2 bg-green-600 text-white rounded"
-                onClick={handleImport}
-                disabled={!importFile}
-              >
-                Import
-              </button>
-            </Box>
-
-            <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
-              <h2 className="text-lg font-bold">Export Buku</h2>
-              {availableFields.map((field) => (
-                <label key={field} className="block">
-                  <input
-                    type="checkbox"
-                    checked={selectedFields.includes(field)}
-                    onChange={() => handleFieldChange(field)}
-                  />
-                  <span className="ml-2">{field}</span>
-                </label>
-              ))}
-
-              <button
-                className="px-4 py-2 bg-blue-500 text-white rounded"
-                onClick={handleExport}
-                disabled={selectedFields.length === 0}
-              >
-                Export
-              </button>
             </Box>
 
             <MainGrid columns={columns} rows={rows} />
@@ -307,61 +268,111 @@ export default function BookManagementPage(props) {
               }}
             >
               <Typography variant="h6" gutterBottom>
-                {selectedBook ? "Edit Book" : "Add New Book"}
+                {selectedBorrowing ? "Edit Borrowing" : "Add New Borrowing"}
               </Typography>
+              <FormControl fullWidth sx={{ my: 2 }}>
+                <InputLabel id="book-label">Book</InputLabel>
+                <Select
+                  labelId="book-label"
+                  id="book"
+                  value={form.book_id}
+                  label="Book"
+                  onChange={(e) =>
+                    setForm({ ...form, book_id: e.target.value })
+                  }
+                >
+                  {books.map((book) => (
+                    <MenuItem value={book.id} key={book.id}>
+                      {book.title} | {book.author}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl fullWidth sx={{ my: 2 }}>
+                <InputLabel id="member-label">Member</InputLabel>
+                <Select
+                  labelId="member-label"
+                  id="member"
+                  value={form.member_id}
+                  label="Member"
+                  onChange={(e) =>
+                    setForm({ ...form, member_id: e.target.value })
+                  }
+                >
+                  {members.map((member) => (
+                    <MenuItem value={member.id} key={member.id}>
+                      {member.name} | {member.email}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
               <TextField
-                label="Title"
-                variant="outlined"
+                label="Borrowed At"
                 fullWidth
-                value={form.title}
-                onChange={(e) => setForm({ ...form, title: e.target.value })}
-                sx={{ my: 2 }}
-              />
-              <TextField
-                label="Author"
-                variant="outlined"
-                fullWidth
-                value={form.author}
-                onChange={(e) => setForm({ ...form, author: e.target.value })}
-                sx={{ my: 2 }}
-              />
-              <TextField
-                label="Genre"
-                variant="outlined"
-                fullWidth
-                value={form.extra_info.genre}
+                value={form.borrowed_at}
+                type="date"
                 onChange={(e) =>
                   setForm({
                     ...form,
-                    extra_info: {
-                      ...form.extra_info,
-                      genre: e.target.value,
+                    borrowed_at: e.target.value,
+                  })
+                }
+                sx={{ my: 2 }}
+              />
+
+              <TextField
+                label="Condition"
+                fullWidth
+                value={form.notes.condition}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    notes: {
+                      ...form.notes,
+                      condition: e.target.value,
                     },
                   })
                 }
                 sx={{ my: 2 }}
               />
+
               <TextField
-                label="Published Year"
-                variant="outlined"
+                label="Remarks"
                 fullWidth
-                type="number"
-                value={form.extra_info.published_year}
+                value={form.notes.remarks}
                 onChange={(e) =>
                   setForm({
                     ...form,
-                    extra_info: {
-                      ...form.extra_info,
-                      published_year: e.target.value,
+                    notes: {
+                      ...form.notes,
+                      remarks: e.target.value,
                     },
                   })
                 }
                 sx={{ my: 2 }}
               />
+
+              <input
+                type="file"
+                accept="application/pdf"
+                style={{ marginBottom: 8, marginTop: 8 }}
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file && file.size > 512000) {
+                    alert("File size must be less than 500KB");
+                    return;
+                  }
+                  setForm({ ...form, attachment: file });
+                }}
+              />
+
               <Button
                 variant="contained"
                 fullWidth
-                onClick={selectedBook ? handleEditBook : handleAddBook}
+                onClick={
+                  selectedBorrowing ? handleEditBorrowing : handleAddBorrowing
+                }
               >
                 Submit
               </Button>
@@ -390,7 +401,7 @@ export default function BookManagementPage(props) {
               </Typography>
               <Typography sx={{ mb: 2 }}>
                 Are you sure you want to delete the role{" "}
-                <strong>{selectedBook?.name}</strong>?
+                <strong>{selectedBorrowing?.name}</strong>?
               </Typography>
               <Stack direction="row" spacing={2} justifyContent="flex-end">
                 <Button

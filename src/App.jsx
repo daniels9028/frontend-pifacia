@@ -7,6 +7,7 @@ import RoleManagementPage from "./page/RoleManagementPage";
 import UserManagementPage from "./page/UserManagementPage";
 import BookManagementPage from "./page/BookManagementPage";
 import MemberManagementPage from "./page/MemberManagementPage";
+import BorrowingManagementPage from "./page/BorrowingManagementPage";
 
 const App = () => {
   return (
@@ -21,6 +22,10 @@ const App = () => {
           <Route path="/user-management" element={<UserManagementPage />} />
           <Route path="/book-management" element={<BookManagementPage />} />
           <Route path="/member-management" element={<MemberManagementPage />} />
+          <Route
+            path="/borrowing-management"
+            element={<BorrowingManagementPage />}
+          />
         </Route>
       </Routes>
     </Router>

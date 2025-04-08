@@ -23,3 +23,19 @@ export const deleteBook = async (credentials) => {
 
   return response.data;
 };
+
+export const exportBook = async (credentials) => {
+  const response = await api.post(`book/export`, credentials);
+
+  return response.data;
+};
+
+export const importBook = async (credentials) => {
+  const response = await api.post(`book/import`, credentials, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return response.data;
+};
