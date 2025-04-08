@@ -11,3 +11,9 @@ export const LoggedUserRequest = async () => {
 
   return response.data;
 };
+
+export const LogoutRequest = async () => {
+  const response = await api.post("logout");
+
+  return response.data;
+};
