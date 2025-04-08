@@ -22,6 +22,8 @@ import {
   deleteBorrowing,
   updateBorrowing,
   getFormOptions,
+  exportBorrowing,
+  importBorrowing,
 } from "../api/borrowing";
 import { getBorrowingColumns } from "../datatable/borrowingTable";
 import {
@@ -42,7 +44,13 @@ const xThemeComponents = {
   ...treeViewCustomizations,
 };
 
+const availableFields = ["book_id", "member_id", "borrowed_at", "notes"];
+
 export default function BorrowingManagementPage(props) {
+  const [selectedFields, setSelectedFields] = useState([]);
+
+  const [importFile, setImportFile] = useState(null);
+
   const [form, setForm] = useState({
     book_id: "",
     member_id: "",
@@ -64,6 +72,12 @@ export default function BorrowingManagementPage(props) {
   const [openModal, setOpenModal] = useState(false);
 
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+
+  const handleFieldChange = (field) => {
+    setSelectedFields((prev) =>
+      prev.includes(field) ? prev.filter((f) => f !== field) : [...prev, field]
+    );
+  };
 
   const handleGetFormOptions = async () => {
     try {
@@ -156,6 +170,42 @@ export default function BorrowingManagementPage(props) {
     }
   };
 
+  const handleExport = async () => {
+    try {
+      const response = await exportBorrowing({ fields: selectedFields });
+
+      if (response?.file_url) {
+        const fileUrl = response.file_url.startsWith("http")
+          ? response.file_url
+          : `http://localhost:8000${response.file_url}`;
+        window.open(fileUrl, "_blank");
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handleImport = async () => {
+    if (!importFile) {
+      alert("Pilih file terlebih dahulu.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", importFile);
+
+    try {
+      await importBorrowing(formData);
+
+      alert("File berhasil diupload. Import sedang diproses.");
+      setImportFile(null);
+      handleGetAllBorrowings(); // Refresh data
+    } catch (error) {
+      console.error(error);
+      alert("Gagal mengimpor file.");
+    }
+  };
+
   const onEdit = (row) => {
     setOpenModal(true);
 
@@ -215,6 +265,45 @@ export default function BorrowingManagementPage(props) {
             }}
           >
             <Header title="Borrowing Management" />
+
+            <Box sx={{ mt: 3 }}>
+              <h2 className="text-lg font-bold">Import Member</h2>
+              <input
+                type="file"
+                accept=".xlsx"
+                onChange={(e) => setImportFile(e.target.files[0])}
+              />
+              <Button
+                onClick={handleImport}
+                disabled={!importFile}
+                variant="outlined"
+              >
+                Import
+              </Button>
+            </Box>
+
+            <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
+              <h2 className="text-lg font-bold">Export Member</h2>
+              {availableFields.map((field) => (
+                <label key={field} className="block">
+                  <input
+                    type="checkbox"
+                    checked={selectedFields.includes(field)}
+                    onChange={() => handleFieldChange(field)}
+                  />
+                  <span className="ml-2">{field}</span>
+                </label>
+              ))}
+
+              <Button
+                variant="outlined"
+                sx={{ ml: 2 }}
+                onClick={handleExport}
+                disabled={selectedFields.length === 0}
+              >
+                Export
+              </Button>
+            </Box>
 
             <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
               <Typography

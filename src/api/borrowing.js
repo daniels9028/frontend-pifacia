@@ -41,3 +41,19 @@ export const deleteBorrowing = async (credentials) => {
 
   return response.data;
 };
+
+export const exportBorrowing = async (credentials) => {
+  const response = await api.post(`borrowing/export`, credentials);
+
+  return response.data;
+};
+
+export const importBorrowing = async (credentials) => {
+  const response = await api.post(`borrowing/import`, credentials, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return response.data;
+};
