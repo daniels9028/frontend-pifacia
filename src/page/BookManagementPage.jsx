@@ -34,7 +34,7 @@ const xThemeComponents = {
   ...treeViewCustomizations,
 };
 
-const availableFields = ["id", "title", "author", "extra_info"];
+const availableFields = ["title", "author", "extra_info"];
 
 export default function BookManagementPage(props) {
   const [selectedFields, setSelectedFields] = useState([]);
@@ -219,6 +219,45 @@ export default function BookManagementPage(props) {
           >
             <Header title="Book Management" />
 
+            <Box sx={{ mt: 3 }}>
+              <h2 className="text-lg font-bold">Import Buku</h2>
+              <input
+                type="file"
+                accept=".xlsx"
+                onChange={(e) => setImportFile(e.target.files[0])}
+              />
+              <Button
+                onClick={handleImport}
+                disabled={!importFile}
+                variant="outlined"
+              >
+                Import
+              </Button>
+            </Box>
+
+            <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
+              <h2 className="text-lg font-bold">Export Buku</h2>
+              {availableFields.map((field) => (
+                <label key={field} className="block">
+                  <input
+                    type="checkbox"
+                    checked={selectedFields.includes(field)}
+                    onChange={() => handleFieldChange(field)}
+                  />
+                  <span className="ml-2">{field}</span>
+                </label>
+              ))}
+
+              <Button
+                variant="outlined"
+                sx={{ ml: 2 }}
+                onClick={handleExport}
+                disabled={selectedFields.length === 0}
+              >
+                Export
+              </Button>
+            </Box>
+
             <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
               <Typography
                 component="h2"
@@ -249,44 +288,6 @@ export default function BookManagementPage(props) {
                   Add
                 </Button>
               </Typography>
-            </Box>
-
-            <Box sx={{ mt: 3 }}>
-              <h2 className="text-lg font-bold">Import Buku</h2>
-              <input
-                type="file"
-                accept=".xlsx"
-                onChange={(e) => setImportFile(e.target.files[0])}
-              />
-              <button
-                className="mt-2 px-4 py-2 bg-green-600 text-white rounded"
-                onClick={handleImport}
-                disabled={!importFile}
-              >
-                Import
-              </button>
-            </Box>
-
-            <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
-              <h2 className="text-lg font-bold">Export Buku</h2>
-              {availableFields.map((field) => (
-                <label key={field} className="block">
-                  <input
-                    type="checkbox"
-                    checked={selectedFields.includes(field)}
-                    onChange={() => handleFieldChange(field)}
-                  />
-                  <span className="ml-2">{field}</span>
-                </label>
-              ))}
-
-              <button
-                className="px-4 py-2 bg-blue-500 text-white rounded"
-                onClick={handleExport}
-                disabled={selectedFields.length === 0}
-              >
-                Export
-              </button>
             </Box>
 
             <MainGrid columns={columns} rows={rows} />
