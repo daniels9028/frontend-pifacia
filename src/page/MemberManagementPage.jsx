@@ -24,7 +24,9 @@ import {
   importMember,
   updateMember,
 } from "../api/member";
-import { getMemberColumns } from "../datatable/memberTable";
+import { auditMembers } from "../api/audit";
+
+import { getAuditColumns, getMemberColumns } from "../datatable/memberTable";
 import { Button, Modal, TextField, Typography } from "@mui/material";
 
 const xThemeComponents = {
@@ -49,6 +51,7 @@ export default function MemberManagementPage(props) {
   const [selectedMember, setSelectedMember] = useState(null);
 
   const [rows, setRows] = useState([]);
+  const [auditRows, setAuditRows] = useState([]);
 
   const [openModal, setOpenModal] = useState(false);
 
@@ -63,8 +66,10 @@ export default function MemberManagementPage(props) {
   const handleGetAllMember = async () => {
     try {
       const response = await allMembers();
+      const responseAudit = await auditMembers();
 
       setRows(response.data);
+      setAuditRows(responseAudit.data);
     } catch (error) {
       console.log(error);
     }
@@ -275,6 +280,12 @@ export default function MemberManagementPage(props) {
             </Box>
 
             <MainGrid columns={columns} rows={rows} />
+
+            <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
+              <h2 className="text-lg font-bold">Audit & Note</h2>
+            </Box>
+
+            <MainGrid columns={getAuditColumns} rows={auditRows} />
           </Stack>
 
           <Modal open={openModal} onClose={() => setOpenModal(false)}>

@@ -24,7 +24,9 @@ import {
   importBook,
   updateBook,
 } from "../api/book";
-import { getBookColumns } from "../datatable/bookTable";
+import { auditBooks } from "../api/audit";
+
+import { getBookColumns, getAuditColumns } from "../datatable/bookTable";
 import { Button, Modal, TextField, Typography } from "@mui/material";
 
 const xThemeComponents = {
@@ -53,6 +55,7 @@ export default function BookManagementPage(props) {
   const [selectedBook, setSelectedBook] = useState(null);
 
   const [rows, setRows] = useState([]);
+  const [auditRows, setAuditRows] = useState([]);
 
   const [openModal, setOpenModal] = useState(false);
 
@@ -67,8 +70,10 @@ export default function BookManagementPage(props) {
   const handleGetAllBook = async () => {
     try {
       const response = await allBooks();
+      const responseAudit = await auditBooks();
 
       setRows(response.data);
+      setAuditRows(responseAudit.data);
     } catch (error) {
       console.log(error);
     }
@@ -291,6 +296,12 @@ export default function BookManagementPage(props) {
             </Box>
 
             <MainGrid columns={columns} rows={rows} />
+
+            <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
+              <h2 className="text-lg font-bold">Audit & Note</h2>
+            </Box>
+
+            <MainGrid columns={getAuditColumns} rows={auditRows} />
           </Stack>
 
           <Modal open={openModal} onClose={() => setOpenModal(false)}>

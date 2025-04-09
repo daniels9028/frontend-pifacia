@@ -25,7 +25,13 @@ import {
   exportBorrowing,
   importBorrowing,
 } from "../api/borrowing";
-import { getBorrowingColumns } from "../datatable/borrowingTable";
+import { auditBorrowing } from "../api/audit";
+
+import {
+  getBorrowingColumns,
+  getAuditColumns,
+} from "../datatable/borrowingTable";
+
 import {
   Button,
   FormControl,
@@ -68,6 +74,7 @@ export default function BorrowingManagementPage(props) {
   const [selectedBorrowing, setSelectedBorrowing] = useState(null);
 
   const [rows, setRows] = useState([]);
+  const [auditRows, setAuditRows] = useState([]);
 
   const [openModal, setOpenModal] = useState(false);
 
@@ -93,8 +100,10 @@ export default function BorrowingManagementPage(props) {
   const handleGetAllBorrowings = async () => {
     try {
       const response = await allBorrowings();
+      const responseAudit = await auditBorrowing();
 
       setRows(response.data);
+      setAuditRows(responseAudit.data);
     } catch (error) {
       console.log(error);
     }
@@ -340,6 +349,12 @@ export default function BorrowingManagementPage(props) {
             </Box>
 
             <MainGrid columns={columns} rows={rows} />
+
+            <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
+              <h2 className="text-lg font-bold">Audit & Note</h2>
+            </Box>
+
+            <MainGrid columns={getAuditColumns} rows={auditRows} />
           </Stack>
 
           <Modal open={openModal} onClose={() => setOpenModal(false)}>

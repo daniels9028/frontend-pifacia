@@ -41,11 +41,11 @@ const mainListItems = [
     icon: <AssignmentRoundedIcon />,
     url: "borrowing-management",
   },
-  {
-    text: "Audit",
-    icon: <AssignmentRoundedIcon />,
-    url: "audit",
-  },
+  // {
+  //   text: "Audit",
+  //   icon: <AssignmentRoundedIcon />,
+  //   url: "audit",
+  // },
 ];
 
 const secondaryListItems = [

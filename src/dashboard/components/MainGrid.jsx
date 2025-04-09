@@ -19,7 +19,7 @@ export default function MainGrid({ columns, rows }) {
           <CustomizedDataGrid columns={columns} rows={rows} />
         </Grid>
       </Grid>
-      <Copyright sx={{ my: 4 }} />
+      {/* <Copyright sx={{ my: 4 }} /> */}
     </Box>
   );
 }

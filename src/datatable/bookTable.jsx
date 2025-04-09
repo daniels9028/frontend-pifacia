@@ -78,3 +78,32 @@ export const getBookColumns = ({ onEdit, onDelete }) => [
     ),
   },
 ];
+
+export const getAuditColumns = [
+  {
+    field: "created_at",
+    headerName: "Date",
+    flex: 1.5,
+    minWidth: 200,
+    renderCell: (params) => renderDate(params.value),
+  },
+  {
+    field: "event",
+    headerName: "Action",
+    flex: 0.5,
+    minWidth: 80,
+  },
+  {
+    field: "user",
+    headerName: "User",
+    flex: 1,
+    minWidth: 80,
+  },
+  {
+    field: "id",
+    headerName: "Note",
+    flex: 1,
+    minWidth: 80,
+    renderCell: (params) => `${params.row.event} ${params.row.model_type}`,
+  },
+];
